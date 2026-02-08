@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { infoPages } from '../../data/mockData';
+import { infoPages } from '../../services/api';
 
 const InfoPage = () => {
   const { type } = useParams();

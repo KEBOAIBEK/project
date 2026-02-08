@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
+import { createReport } from '../../services/api';
 
 const ReportPage = () => {
   const { t, theme } = useApp();
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
   const [formData, setFormData] = useState({
     type: '',
     identifier: '',
@@ -40,15 +42,32 @@ const ReportPage = () => {
     setFormData({ ...formData, category: categoryId });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmitError(null);
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      // Prepare report data for API
+      const reportData = {
+        type: types.find(t => t.id === formData.type)?.label || formData.type,
+        identifier: formData.identifier,
+        category: categories.find(c => c.id === formData.category)?.label || formData.category,
+        description: formData.description,
+        contact: formData.contact || null,
+        status: 'pending',
+        trustScore: 0,
+        reportCount: 1,
+      };
+
+      await createReport(reportData);
       setIsSubmitted(true);
-    }, 1500);
+    } catch (err) {
+      console.error('Error submitting report:', err);
+      setSubmitError(err.message || 'Xabar yuborishda xatolik yuz berdi');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const getTypeIcon = (iconName) => {
@@ -190,6 +209,15 @@ const ReportPage = () => {
             </div>
           ))}
         </div>
+
+        {/* Error Message */}
+        {submitError && (
+          <div className={`mb-6 p-4 rounded-lg ${
+            theme === 'dark' ? 'bg-red-500/10 border border-red-500/20' : 'bg-red-50 border border-red-200'
+          }`}>
+            <p className="text-red-500 text-sm">{submitError}</p>
+          </div>
+        )}
 
         {/* Step 1: Select Type */}
         {step === 1 && (

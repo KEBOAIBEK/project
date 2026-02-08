@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
-import { stats, reports } from '../../data/mockData';
+import { useReports } from '../../context/ReportsContext';
+import { searchReports, transformReport } from '../../services/api';
 
 const Hero = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -9,25 +10,20 @@ const Hero = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const { t, theme } = useApp();
+  const { stats } = useReports(); // Use shared context instead of fetching
 
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
 
     setIsSearching(true);
     setHasSearched(true);
 
-    // Simulate API call delay
-    setTimeout(() => {
-      const query = searchQuery.toLowerCase().trim();
+    try {
+      const results = await searchReports(searchQuery);
       
-      // Search in reports
-      const found = reports.find(report => 
-        report.identifier.toLowerCase().includes(query) ||
-        report.identifier.toLowerCase().replace(/\s/g, '').includes(query.replace(/\s/g, ''))
-      );
-
-      if (found) {
+      if (results.length > 0) {
+        const found = transformReport(results[0]);
         setSearchResult({
           found: true,
           ...found
@@ -38,8 +34,16 @@ const Hero = () => {
           query: searchQuery
         });
       }
+    } catch (err) {
+      console.error('Search error:', err);
+      setSearchResult({
+        found: false,
+        query: searchQuery,
+        error: true
+      });
+    } finally {
       setIsSearching(false);
-    }, 800);
+    }
   };
 
   const handleSuggestionClick = (suggestion) => {

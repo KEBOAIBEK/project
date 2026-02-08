@@ -1,13 +1,42 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
-import { reports } from '../../data/mockData';
+import { getReports, transformReport } from '../../services/api';
 
 const AllReports = () => {
   const [viewMode, setViewMode] = useState('table');
   const [filterType, setFilterType] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const { t, theme } = useApp();
+
+  useEffect(() => {
+    fetchReports();
+  }, [page]);
+
+  const fetchReports = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await getReports(page, 20);
+      
+      // Handle different response formats
+      const data = response.content || response.data || response || [];
+      const transformedReports = Array.isArray(data) ? data.map(transformReport) : [];
+      
+      setReports(transformedReports);
+      setTotalPages(response.totalPages || 1);
+    } catch (err) {
+      console.error('Error fetching reports:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredReports = reports.filter(report => {
     if (filterType !== 'all' && report.type !== filterType) return false;
@@ -58,6 +87,52 @@ const AllReports = () => {
   const selectClass = theme === 'dark'
     ? 'px-4 py-2 bg-[#151d2e] border border-white/[0.08] rounded-lg text-white text-sm outline-none focus:border-blue-500/50'
     : 'px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-900 text-sm outline-none focus:border-blue-500';
+
+  // Loading State
+  if (loading) {
+    return (
+      <main className="min-h-screen py-8">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex items-center justify-center py-20">
+            <div className="text-center">
+              <svg className="animate-spin h-10 w-10 mx-auto mb-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <p className="text-theme-secondary">Yuklanmoqda...</p>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // Error State
+  if (error) {
+    return (
+      <main className="min-h-screen py-8">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center py-20">
+            <div className={`w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center ${theme === 'dark' ? 'bg-red-500/10' : 'bg-red-50'}`}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-red-500">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-theme-primary mb-2">Xatolik yuz berdi</h3>
+            <p className="text-theme-secondary mb-6">{error}</p>
+            <button 
+              onClick={fetchReports}
+              className="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors"
+            >
+              Qayta urinish
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen py-8">
@@ -238,6 +313,50 @@ const AllReports = () => {
                 </div>
               </Link>
             ))}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex justify-center gap-2 mt-8">
+            <button
+              onClick={() => setPage(p => Math.max(0, p - 1))}
+              disabled={page === 0}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                page === 0 
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : 'hover:bg-blue-500/10'
+              } ${theme === 'dark' ? 'bg-white/[0.06] text-white' : 'bg-gray-100 text-gray-700'}`}
+            >
+              ← Oldingi
+            </button>
+            <span className="px-4 py-2 text-theme-secondary">
+              {page + 1} / {totalPages}
+            </span>
+            <button
+              onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+              disabled={page >= totalPages - 1}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                page >= totalPages - 1 
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : 'hover:bg-blue-500/10'
+              } ${theme === 'dark' ? 'bg-white/[0.06] text-white' : 'bg-gray-100 text-gray-700'}`}
+            >
+              Keyingi →
+            </button>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {filteredReports.length === 0 && !loading && (
+          <div className={`text-center py-16 rounded-xl ${
+            theme === 'dark' ? 'bg-[#151d2e] border border-white/[0.06]' : 'bg-white border border-gray-200'
+          }`}>
+            <svg width="48" height="48" className="mx-auto mb-4 text-theme-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <h3 className="text-lg font-semibold text-theme-primary mb-2">Hisobotlar topilmadi</h3>
+            <p className="text-theme-secondary">Filtrlarni o'zgartiring yoki keyinroq qayta urinib ko'ring</p>
           </div>
         )}
       </div>

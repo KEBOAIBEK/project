@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
-import { resources } from '../../data/mockData';
+import { resources } from '../../services/api';
 
 const ResourcesGrid = () => {
   const { t, theme } = useApp();

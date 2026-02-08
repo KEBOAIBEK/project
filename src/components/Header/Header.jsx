@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
+import Logo from '../../assets/images/Logo.png';
 
 const Header = () => {
   const { language, languages, changeLanguage, theme, toggleTheme, t } = useApp();
@@ -24,11 +25,11 @@ const Header = () => {
     <header className="sticky top-0 z-50 bg-theme-primary/90 backdrop-blur-xl border-b border-theme">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-3 group">
-          <div className="w-9 h-9 rounded-lg bg-blue-500 flex items-center justify-center">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="12" r="4" stroke="white" strokeWidth="2.5" fill="none"/>
-            </svg>
-          </div>
+          <img 
+            src={Logo} 
+            alt="Antifroduz Logo" 
+            className="w-9 h-9 rounded-lg object-contain"
+          />
           <div className="flex flex-col">
             <span className="text-lg font-bold text-theme-primary leading-tight">Antifroduz</span>
             <span className="text-[10px] text-theme-muted uppercase tracking-wider">Anti-Fraud Platform</span>

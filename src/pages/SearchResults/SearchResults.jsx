@@ -1,21 +1,38 @@
+import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
-import { reports } from '../../data/mockData';
+import { searchReports, transformReport } from '../../services/api';
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
   const { t, theme } = useApp();
+  const [searchResults, setSearchResults] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Search logic - match reports by identifier or description
-  const searchResults = reports.filter(report => {
-    const searchLower = query.toLowerCase();
-    return (
-      report.identifier.toLowerCase().includes(searchLower) ||
-      report.description.toLowerCase().includes(searchLower) ||
-      report.type.toLowerCase().includes(searchLower)
-    );
-  });
+  useEffect(() => {
+    if (query) {
+      performSearch();
+    } else {
+      setLoading(false);
+    }
+  }, [query]);
+
+  const performSearch = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const results = await searchReports(query);
+      const transformedResults = results.map(transformReport);
+      setSearchResults(transformedResults);
+    } catch (err) {
+      console.error('Error searching:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getTypeIcon = (type) => {
     switch (type) {
@@ -57,6 +74,25 @@ const SearchResults = () => {
     return styles[status] || 'bg-slate-500/10 text-slate-400';
   };
 
+  // Loading State
+  if (loading) {
+    return (
+      <main className="min-h-screen py-8">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="flex items-center justify-center py-20">
+            <div className="text-center">
+              <svg className="animate-spin h-10 w-10 mx-auto mb-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <p className="text-theme-secondary">Qidirilmoqda...</p>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen py-8">
       <div className="max-w-4xl mx-auto px-6">
@@ -74,7 +110,21 @@ const SearchResults = () => {
           </p>
         </div>
 
-        {searchResults.length === 0 ? (
+        {error && (
+          <div className={`text-center py-8 rounded-xl mb-6 ${
+            theme === 'dark' ? 'bg-red-500/10 border border-red-500/20' : 'bg-red-50 border border-red-200'
+          }`}>
+            <p className="text-red-500">{error}</p>
+            <button 
+              onClick={performSearch}
+              className="mt-4 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
+            >
+              Qayta urinish
+            </button>
+          </div>
+        )}
+
+        {searchResults.length === 0 && !error ? (
           <div className={`text-center py-16 rounded-xl ${
             theme === 'dark' ? 'bg-[#151d2e] border border-white/[0.06]' : 'bg-white border border-gray-200'
           }`}>
