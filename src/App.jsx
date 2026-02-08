@@ -1,24 +1,34 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AppProvider } from './context/AppContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import ReportDetail from './pages/ReportDetail';
 import InfoPage from './pages/InfoPage';
-import './App.css';
+import AllReports from './pages/AllReports';
+import SearchResults from './pages/SearchResults';
+import ReportPage from './pages/ReportPage';
 
 function App() {
   return (
-    <Router>
-      <div className="app">
-        <Header />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/report/:id" element={<ReportDetail />} />
-          <Route path="/info/:type" element={<InfoPage />} />
-        </Routes>
-        <Footer />
-      </div>
-    </Router>
+    <AppProvider>
+      <Router>
+        <div className="min-h-screen flex flex-col bg-theme-primary">
+          <Header />
+          <div className="flex-1">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/reports" element={<AllReports />} />
+              <Route path="/report/:id" element={<ReportDetail />} />
+              <Route path="/report" element={<ReportPage />} />
+              <Route path="/info/:type" element={<InfoPage />} />
+              <Route path="/search" element={<SearchResults />} />
+            </Routes>
+          </div>
+          <Footer />
+        </div>
+      </Router>
+    </AppProvider>
   );
 }
 
