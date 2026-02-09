@@ -318,8 +318,10 @@ const Hero = () => {
                   >
                     Yangi qidiruv
                   </button>
-                  <Link 
-                    to="/report"
+                  <a 
+                    href="https://t.me/AntifraudUzBot"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className={`px-6 py-2.5 rounded-lg font-medium transition-colors ${
                       theme === 'dark'
                         ? 'bg-white/[0.06] text-white hover:bg-white/[0.1]'
@@ -327,7 +329,7 @@ const Hero = () => {
                     }`}
                   >
                     Xabar qilish
-                  </Link>
+                  </a>
                 </div>
               </div>
             )}

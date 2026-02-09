@@ -213,7 +213,8 @@ export const createComment = async (commentData) => {
 export const searchReports = async (query, type = null) => {
   try {
     const response = await getReports(0, 100);
-    const reports = response.items || [];
+    const data = response.result || response;
+    const reports = data.items || [];
     
     const queryLower = query.toLowerCase();
     let results = reports.filter(report => 

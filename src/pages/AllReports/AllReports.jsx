@@ -24,12 +24,13 @@ const AllReports = () => {
       setError(null);
       const response = await getReports(page, 20);
       
-      // Handle different response formats
-      const data = response.content || response.data || response || [];
-      const transformedReports = Array.isArray(data) ? data.map(transformReport) : [];
+      // Handle API response - data is wrapped in 'result' object
+      const result = response.result || response;
+      const items = result.items || result.content || result.data || [];
+      const transformedReports = Array.isArray(items) ? items.map(transformReport) : [];
       
       setReports(transformedReports);
-      setTotalPages(response.totalPages || 1);
+      setTotalPages(result.pageTotal || result.totalPages || 1);
     } catch (err) {
       console.error('Error fetching reports:', err);
       setError(err.message);

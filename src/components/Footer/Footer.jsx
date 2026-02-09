@@ -49,7 +49,7 @@ const Footer = () => {
             <ul className="space-y-3">
               <li><Link to="/" className="text-sm text-theme-secondary hover:text-theme-primary transition-colors">{t('home')}</Link></li>
               <li><Link to="/reports" className="text-sm text-theme-secondary hover:text-theme-primary transition-colors">{t('recentReports')}</Link></li>
-              <li><Link to="/report" className="text-sm text-theme-secondary hover:text-theme-primary transition-colors">{t('reportScam')}</Link></li>
+              <li><a href="https://t.me/AntifraudUzBot" target="_blank" rel="noopener noreferrer" className="text-sm text-theme-secondary hover:text-theme-primary transition-colors">{t('reportScam')}</a></li>
             </ul>
           </div>
 

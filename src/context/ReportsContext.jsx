@@ -31,20 +31,21 @@ export const ReportsProvider = ({ children }) => {
       
       const response = await getReports(page, size);
       
-      // Handle different response formats
-      const items = response.items || response.content || response.data || response || [];
+      // Handle different response formats - API wraps data in 'result' object
+      const data = response.result || response;
+      const items = data.items || data.content || data.data || [];
       const transformedReports = Array.isArray(items) ? items.map(transformReport) : [];
       
       setReports(transformedReports);
       setStats({
-        weeklyReports: Math.min(response.total || transformedReports.length, 50),
-        totalReports: response.total || transformedReports.length
+        weeklyReports: Math.min(data.total || transformedReports.length, 50),
+        totalReports: data.total || transformedReports.length
       });
       setPagination({
-        page: response.page || page,
-        size: response.size || size,
-        total: response.total || transformedReports.length,
-        pageTotal: response.pageTotal || Math.ceil((response.total || transformedReports.length) / size)
+        page: data.page ?? page,
+        size: data.size || size,
+        total: data.total || transformedReports.length,
+        pageTotal: data.pageTotal || Math.ceil((data.total || transformedReports.length) / size)
       });
     } catch (err) {
       console.error('Error fetching reports:', err);
