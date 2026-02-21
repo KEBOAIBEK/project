@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { getReports, transformReport } from '../services/api';
+import { getReports, transformReport } from '../services/reportsService';
 
 const ReportsContext = createContext();
 
